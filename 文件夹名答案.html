@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BM Peribahasa Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f2f2f2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .question {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result {
+            background: #e6ffe6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .history {
+            background: #e6f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .save-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .save-btn {
+            background-color: #2196F3;
+            margin: 5px;
+        }
+        .save-btn:hover {
+            background-color: #0b7dda;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            margin: 5px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1da851;
+        }
+        .download-btn {
+            background-color: #FF6B35;
+            margin: 5px;
+        }
+        .download-btn:hover {
+            background-color: #E55A2B;
+        }
+        #reportCanvas {
+            text-align: center;
+        }
+        .canvas-container {
+            display: inline-block;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        label:hover {
+            background-color: #f0f0f0;
+        }
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>BM Peribahasa Quiz - 马来语谚语测验</h2>
+<div style="background: #e6f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>💡 温馨提示：</strong></p>
+    <p>• 📱 <strong>发送文字成绩</strong> - 直接发送文字格式成绩到老师WhatsApp (+60127317286)</p>
+    <p>• 🖼️ <strong>一键发送图片成绩单</strong> - 智能分享：在手机上可直接选择WhatsApp发送图片！</p>
+    <p>• 📱 在手机上使用时，点击图片按钮会直接打开分享菜单，选择WhatsApp即可！</p>
+    <p>• 💻 在电脑上使用时，会自动下载图片并打开老师的WhatsApp对话</p>
+    <p>• 🎯 两种方式都直接连接到老师 (+60127317286)，无需查找联系人！</p>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="showTab('quiz')">做测验</div>
+    <div class="tab" onclick="showTab('history')">查看记录</div>
+</div>
+
+<div id="quiz" class="tab-content active">
+    <form id="quizForm">
+        <label>Name (名字):</label><br>
+        <input type="text" id="name" required><br><br>
+
+        <label>Form (年级):</label><br>
+        <select id="form" required>
+            <option value="">Select</option>
+            <option value="F1">F1</option>
+            <option value="F2">F2</option>
+            <option value="F3">F3</option>
+            <option value="F4">F4</option>
+            <option value="F5">F5</option>
+        </select><br><br>
+
+        <div id="questions"></div>
+
+        <button type="button" onclick="submitQuiz()">提交答案</button>
+        <button type="button" onclick="saveProgress()">保存进度</button>
+        <button type="button" onclick="loadProgress()">加载进度</button>
+    </form>
+
+    <div id="result" class="result hidden"></div>
+</div>
+
+<div id="history" class="tab-content">
+    <h3>你的测验记录</h3>
+    <div id="historyList"></div>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "Tabiat kaki judi ketua keluarga itu membuatkan semua anak dan isteri hidup menderita umpama __________.",
+        options: ["usang dibarui, lapuk dikajangi", "rosak bawang ditimpa jambak", "cubit paha kanan, paha kiri terasa juga", "tak lapuk dek hujan, tak lekang dek panas"],
+        answer: "cubit paha kanan, paha kiri terasa juga",
+        explain: "当一个人受苦时，其家人也会感同身受。这句谚语表示一人的行为会影响到整个家庭。",
+        encourage: "对谚语含义的理解很准确！你已经掌握了这个表达家庭关系的谚语。"
+    },
+    {
+        q: "Siti berasa sedih melihat adiknya yang menderita penyakit leukimia kerana __________.",
+        options: ["cubit paha kanan, paha kiri pun terasa juga", "rosak bawang ditimpa jambak", "usang dibarui, lapuk dikajangi", "tak lapuk dek hujan, tak lekang dek panas"],
+        answer: "cubit paha kanan, paha kiri pun terasa juga",
+        explain: "这句谚语表达手足之情，兄弟姐妹之间的感情深厚，一人痛苦，另一人也会感到痛苦。",
+        encourage: "很好地理解了亲情相关的谚语！你对情感表达的谚语掌握得很棒。"
+    },
+    {
+        q: "Pilihkan peribahasa yang tepat berdasarkan maksud 'sesuatu adat atau budaya yang tiada berubah-ubah dan dikekalkan selama-lamanya'",
+        options: ["tiada rotan, akar pun berguna", "tak lapuk dek hujan, tak lekang dek panas", "usang dibarui, lapuk dikajangi", "orang memberi kita merasa, orang berbudi kita berbahasa"],
+        answer: "tak lapuk dek hujan, tak lekang dek panas",
+        explain: "这句谚语的意思是某些传统或文化永不改变，能够传承下去，不受时间影响。",
+        encourage: "对传统文化谚语的理解非常正确！这是一个很重要的马来文化概念。"
+    },
+    {
+        q: "Pilihkan peribahasa yang tepat berdasarkan maksud 'kalau tiada yang baik, maka yang kurang baik pun boleh juga'",
+        options: ["tiada rotan, akar pun berguna", "tak lapuk dek hujan, tak lekang dek panas", "usang dibarui, lapuk dikajangi", "orang memberi kita merasa, orang berbudi kita berbahasa"],
+        answer: "tiada rotan, akar pun berguna",
+        explain: "这句谚语表示在没有更好选择的情况下，次好的选择也是可以接受的。",
+        encourage: "理解了灵活变通的智慧！这句谚语教导我们要懂得适应和调整。"
+    },
+    {
+        q: "Pilihkan peribahasa yang tepat berdasarkan maksud 'perasaan besar hati dan bersyukur apabila mendapat sesuatu'",
+        options: ["ada ubi ada batas, ada hari boleh balas", "kecil tapak tangan, nyiru ditadahkan", "usang dibarui, lapuk dikajangi", "orang memberi kita merasa, orang berbudi kita berbahasa"],
+        answer: "kecil tapak tangan, nyiru ditadahkan",
+        explain: "这句谚语表达了对得到的帮助或恩惠感到非常感激，即使是小小的帮助也要心存感激。",
+        encourage: "对感恩谚语的理解很到位！懂得感恩是很重要的品德。"
+    },
+    {
+        q: "Remaja yang menyertai konvoi berbasikal mestilah berhati-hati semasa menunggang basikal untuk mengelakkan diri daripada kemalangan jalan raya kerana _____________.",
+        options: ["melentur buluh biarlah dari rebungnya", "malang tidak berbau", "mencegah lebih baik daripada mengubati", "masa itu emas"],
+        answer: "mencegah lebih baik daripada mengubati",
+        explain: "这句谚语强调预防胜于治疗，在问题发生之前就采取预防措施是明智的做法。",
+        encourage: "安全意识的谚语用得很准确！预防的智慧你已经掌握了。"
+    },
+    {
+        q: "Encik Lim menjadi _________ untuk menyampaikan ucapan apabila pengerusi majlis tidak hadir. Pilih peribahasa yang sesuai:",
+        options: ["bidan terjun", "bidan tarik", "mati katak", "anjing hitam"],
+        answer: "bidan terjun",
+        explain: "'Bidan terjun' 指的是临时被安排或被迫承担某项任务的人。",
+        encourage: "对工作情境谚语的理解很精确！临时承担责任的概念掌握得很好。"
+    },
+    {
+        q: "Pilih ayat yang sesuai untuk diisi peribahasa 'seperti katak di bawah tempurung': I. Ally dikatakan _____________ kerana tidak mengetahui peristiwa bencana alam. II. Dia menjadi _____________ apabila berbual dengan rakannya.",
+        options: ["I sahaja", "II sahaja", "I dan II", "Tiada yang betul"],
+        answer: "I dan II",
+        explain: "'Seperti katak di bawah tempurung' 形容见识浅薄，不了解外面世界的人。两个例子都适用。",
+        encourage: "对比喻谚语的应用非常准确！你能正确识别适用的情境。"
+    },
+    {
+        q: "Peribahasa 'tak lapuk dek hujan, tak lekang dek panas' menunjukkan sesuatu yang kekal. Pilih contoh ayat yang sesuai: I. Tarian zapin perlu dipertahankan. II. Upacara bersanding masih popular.",
+        options: ["I sahaja", "II sahaja", "I dan II", "Tiada yang betul"],
+        answer: "I dan II",
+        explain: "两个例子都说明了传统文化的持续性和不变性，符合这句谚语的含义。",
+        encourage: "对文化传承谚语的应用理解得很全面！传统文化的重要性你已经明白了。"
+    },
+    {
+        q: "Peribahasa 'kecil tapak tangan, nyiru ditadahkan' menunjukkan perasaan bersyukur. Pilih peribahasa yang BERTENTANGAN maksud:",
+        options: ["bagai ulat lupakan daun", "ada hujan ada panas, ada hari boleh balas", "bagai kacang lupakan kulitnya", "A dan C"],
+        answer: "A dan C",
+        explain: "两句谚语都表示忘恩负义，与感恩的含义相反。",
+        encourage: "对比分析谚语含义的能力很强！你能准确识别相反的概念。"
+    },
+    {
+        q: "Kemalangan jalan raya yang menimpa suaminya dan diikuti pula kematian anak tunggalnya menyebabkan Mak Cik Aina berada dalam kedukaan. Situasi ini bersesuaian dengan peribahasa:",
+        options: ["sesal dahulu pendapatan, sesal kemudian tidak berguna", "cubit paha kanan, paha kiri terasa juga", "malang tidak berbau", "sudah jatuh, ditimpa tangga"],
+        answer: "sudah jatuh, ditimpa tangga",
+        explain: "这句谚语形容祸不单行，一个不幸接着另一个不幸。",
+        encourage: "对描述连续不幸的谚语理解得很准确！你能正确识别情境。"
+    },
+    {
+        q: "Aiman tidak berpuas hati dengan arahan majikannya yang menyuruhnya membuat pembentangan projek secara tiba-tiba. Situasi ini bersesuaian dengan peribahasa:",
+        options: ["malang tidak berbau", "masa itu emas", "mencegah lebih baik daripada mengubati", "seperti katak di bawah tempurung"],
+        answer: "malang tidak berbau",
+        explain: "这句谚语表示不幸或麻烦来得突然，无法预料。",
+        encourage: "对突发状况谚语的应用很恰当！意外情况的描述你掌握得很好。"
+    },
+    {
+        q: "Setiap kaum perlulah menjaga budaya tradisi yang lama agar budaya ini dapat berkekalan selama-lamanya. Peribahasa yang sesuai:",
+        options: ["tiada rotan, akar pun berguna", "tak lapuk dek hujan, tak lekang dek panas", "usang dibarui, lapuk dikajangi", "seperti katak di bawah tempurung"],
+        answer: "tak lapuk dek hujan, tak lekang dek panas",
+        explain: "这句谚语强调传统文化的持久性和不变性，适合描述文化传承。",
+        encourage: "对文化保护谚语的选择很精准！文化传承的重要性理解得很好。"
+    },
+    {
+        q: "Ali telah membaca novel itu sedangkan majalah kegemarannya telah hilang untuk mengisi masa lapangnya. Peribahasa yang sesuai:",
+        options: ["tiada rotan, akar pun berguna", "tak lapuk dek hujan, tak lekang dek panas", "malang tidak berbau", "seperti katak di bawah tempurung"],
+        answer: "tiada rotan, akar pun berguna",
+        explain: "这句谚语表示在没有更好选择时，用其他替代品也是可以的。",
+        encourage: "对替代选择谚语的应用很恰当！灵活应变的智慧掌握得很好。"
+    },
+    {
+        q: "Konvoi berbasikal yang dijalankan di jalan raya mungkin menjadi tragedi dan membahayakan penunggang basikal pada bila-bila masa. Peribahasa yang bersesuaian:",
+        options: ["mencegah lebih baik daripada mengubati", "malang tidak berbau", "masa itu emas", "seperti katak di bawah tempurung"],
+        answer: "malang tidak berbau",
+        explain: "这句谚语表示意外或不幸可能随时发生，无法预料。",
+        encourage: "对安全警示谚语的理解很到位！危险意识的表达掌握得很好。"
+    },
+    {
+        q: "Mangsa-mangsa banjir itu amat bersyukur kepada sumbangan daripada semua pihak yang baik hati kerana mereka sedar bahawa:",
+        options: ["malang tidak berbau", "kecil tapak tangan, nyiru ditadahkan", "tak lapuk dek hujan, tak lekang dek panas", "tiada rotan, akar pun berguna"],
+        answer: "kecil tapak tangan, nyiru ditadahkan",
+        explain: "这句谚语表达对得到帮助的感激之情，即使是小小的帮助也要心存感激。",
+        encourage: "对感恩情境的谚语选择很准确！感恩之心的表达理解得很好。"
+    },
+    {
+        q: "Situasi yang menggambarkan peribahasa 'kecil tapak tangan, nyiru ditadahkan':",
+        options: ["Seorang pelajar yang tidak bersyukur dengan keputusan peperiksaannya", "Seorang pekerja yang mengeluh tentang gaji yang diterima", "Seorang petani yang bersyukur dengan hasil tanaman yang sedikit", "Seorang saudagar yang tamak dengan keuntungan"],
+        answer: "Seorang petani yang bersyukur dengan hasil tanaman yang sedikit",
+        explain: "这个例子完美展现了即使收获不多也心存感激的态度，符合谚语含义。",
+        encourage: "对感恩谚语实际应用的理解很完美！知足常乐的智慧掌握得很好。"
+    },
+    {
+        q: "Peribahasa 'bagai aur dengan tebing' menggambarkan:",
+        options: ["Persahabatan yang erat dan saling membantu", "Orang yang tidak mengenang budi", "Seseorang yang sombong", "Keadaan yang tidak menentu"],
+        answer: "Persahabatan yang erat dan saling membantu",
+        explain: "这句谚语形容两者之间密不可分的关系，就像竹子与河岸相依相存。",
+        encourage: "对友谊谚语的理解很精准！相互依存关系的概念掌握得很好。"
+    },
+    {
+        q: "Orang yang mempunyai ilmu pengetahuan yang terhad dan tidak tahu tentang hal yang berlaku di sekelilingnya boleh diumpamakan sebagai:",
+        options: ["bagai pinang dibelah dua", "seperti katak di bawah tempurung", "bagai aur dengan tebing", "seperti anjing dengan kucing"],
+        answer: "seperti katak di bawah tempurung",
+        explain: "这句谚语形容见识浅薄，不了解外面世界的人，就像井底之蛙。",
+        encourage: "对比喻谚语的理解很到位！形容知识局限性的表达掌握得很好。"
+    },
+    {
+        q: "Situasi yang menggambarkan 'malang tidak berbau':",
+        options: ["Seorang murid yang rajin belajar tetapi gagal dalam peperiksaan", "Seorang pekerja yang tiba lewat kerana kereta rosak", "Seorang atlet yang cedera secara tiba-tiba sebelum pertandingan penting", "Semua jawapan di atas"],
+        answer: "Semua jawapan di atas",
+        explain: "所有例子都说明了不幸或意外可能突然降临，无法预料，符合这句谚语的含义。",
+        encourage: "对意外谚语的全面理解很出色！你能识别各种突发状况的例子。"
+    }
+];
+
+function showTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Deactivate all tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabId).classList.add('active');
+    
+    // Activate selected tab
+    event.currentTarget.classList.add('active');
+    
+    // If history tab is selected, load history
+    if (tabId === 'history') {
+        loadHistory();
+    }
+}
+
+function submitQuiz() {
+    const name = document.getElementById('name').value;
+    const form = document.getElementById('form').value;
+    
+    if (!name || !form) {
+        alert("请填写完整的个人信息！");
+        return;
+    }
+    
+    let score = 0;
+    let results = [];
+    let unanswered = 0;
+    
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        const isCorrect = selected && selected.value === q.answer;
+        
+        if (isCorrect) score++;
+        if (!selected) unanswered++;
+        
+        results.push({
+            question: q.q,
+            selected: selected ? selected.value : "未作答",
+            correct: q.answer,
+            isCorrect: isCorrect,
+            explain: q.explain,
+            encourage: q.encourage
+        });
+    });
+    
+    // Save the attempt to history
+    saveAttempt(name, form, score, results);
+    
+    // Display results
+    displayResults(name, form, score, results, unanswered);
+}
+
+function displayResults(name, form, score, results, unanswered) {
+    let output = `
+        <h3>名字: ${name}</h3>
+        <h3>年级: ${form}</h3>
+        <h3>得分: <span class="${score >= 15 ? 'correct' : 'incorrect'}">${score} / 20</span></h3>
+        ${unanswered > 0 ? `<p>注意：你有 ${unanswered} 题没有作答</p>` : ''}
+        <p>${getFeedback(score)}</p>
+        <div class="save-buttons">
+            <button class="whatsapp-btn" onclick="sendToWhatsApp('${name}', '${form}', ${score}, ${unanswered}, 'teacher')">📱 发送文字成绩</button>
+            <button class="whatsapp-btn" onclick="generateReportImage('${name}', '${form}', ${score}, ${unanswered})">🖼️ 一键发送图片成绩单</button>
+        </div>
+        <div id="reportCanvas" style="margin-top: 20px;"></div>
+        <hr>
+    `;
+    
+    results.forEach((r, index) => {
+        output += `
+            <div class="question">
+                <p><strong>第${index + 1}题：${r.isCorrect ? '正确 ✅' : '错误 ❌'}</strong></p>
+                <p>题目: ${r.question}</p>
+                ${!r.isCorrect ? `<p>你的答案: <span class="incorrect">${r.selected}</span></p>` : ''}
+                <p>正确答案: <span class="correct">${r.correct}</span></p>
+                <p>解释: ${r.explain}</p>
+                <p>鼓励: ${r.encourage}</p>
+            </div>
+        `;
+    });
+    
+    document.getElementById('result').innerHTML = output;
+    document.getElementById('result').classList.remove('hidden');
+    
+    // Scroll to results
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getFeedback(score) {
+    if (score === 20) {
+        return "太厉害啦！全对耶！你的马来语谚语掌握得非常棒！🎉 给自己点个赞吧！";
+    } else if (score >= 17) {
+        return "成绩很不错哦！只有几个小地方需要注意，你已经掌握大部分谚语啦！✨";
+    } else if (score >= 14) {
+        return "挺好的！基本谚语都掌握了，错题看看解释，下次会更好哒！😊";
+    } else if (score >= 10) {
+        return "有进步空间哦！错题都是学习机会，慢慢来，你的谚语会越来越棒的！💪";
+    } else {
+        return "第一次接触马来语谚语吧？别担心！每个人都是这样进步的，多练习就会好很多啦！🌱";
+    }
+}
+
+function sendToWhatsApp(name, form, score, unanswered, recipient = 'teacher') {
+    const date = new Date().toLocaleString();
+    const percentage = Math.round((score / 20) * 100);
+    const grade = getGrade(score);
+    
+    let message = '';
+    let whatsappUrl = '';
+    
+    if (recipient === 'teacher') {
+        message += `尊敬的老师，您好！\n\n`;
+        message += `我是 ${name} (${form})，刚完成了BM Peribahasa测验，现向您汇报成绩：\n\n`;
+        message += `📊 测验成绩: ${score}/20 分 (${percentage}%)\n`;
+        message += `⭐ 等级: ${grade}\n`;
+        message += `📅 测验时间: ${date}\n`;
+        if (unanswered > 0) {
+            message += `⚠️ 未完成题目: ${unanswered} 题\n`;
+        }
+        message += `\n🎯 掌握程度: ${getSkillLevel(score)}\n`;
+        message += `\n我会继续努力学习马来语谚语，谢谢老师的指导！`;
+        
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Create WhatsApp URL with specific teacher phone number
+        whatsappUrl = `https://wa.me/60127317286?text=${encodedMessage}`;
+        
+    } else {
+        // General message (fallback)
+        message += `📚 BM Peribahasa Quiz 成绩报告\n\n`;
+        message += `👤 姓名: ${name}\n`;
+        message += `🎓 年级: ${form}\n`;
+        message += `📅 测验日期: ${date}\n`;
+        message += `📊 得分: ${score}/20 (${percentage}%)\n`;
+        message += `⭐ 等级: ${grade}\n`;
+        if (unanswered > 0) {
+            message += `⚠️ 未作答题目: ${unanswered} 题\n`;
+        }
+        message += `\n📝 评语: ${getFeedback(score)}\n`;
+        message += `\n🎯 马来语谚语掌握程度: ${getSkillLevel(score)}\n`;
+        message += `\n💪 继续加油，学好马来语谚语！`;
+        
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Create general WhatsApp URL
+        whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    }
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+}
+
+function generateReportImage(name, form, score, unanswered) {
+    // Get current quiz results for error analysis
+    let wrongAnswers = [];
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        const isCorrect = selected && selected.value === q.answer;
+        if (!isCorrect) {
+            wrongAnswers.push({
+                number: index + 1,
+                question: q.q.substring(0, 50) + "...",
+                selected: selected ? selected.value : "未作答",
+                correct: q.answer
+            });
+        }
+    });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 1000;
+    
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f8f9fa');
+    gradient.addColorStop(1, '#e9ecef');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Header background
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillRect(0, 0, canvas.width, 120);
+    
+    // Title
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('BM Peribahasa Quiz', canvas.width/2, 50);
+    ctx.fillText('马来语谚语测验成绩单', canvas.width/2, 90);
+    
+    // Student Info Section
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('学生信息 Student Information', 50, 170);
+    
+    ctx.font = '20px Arial';
+    ctx.fillText(`姓名 Name: ${name}`, 50, 210);
+    ctx.fillText(`年级 Form: ${form}`, 50, 240);
+    ctx.fillText(`测验日期 Date: ${new Date().toLocaleDateString()}`, 50, 270);
+    
+    // Score Section
+    const percentage = Math.round((score / 20) * 100);
+    const grade = getGrade(score);
+    
+    ctx.fillStyle = '#2196F3';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('测验成绩 Test Results', 50, 320);
+    
+    // Score circle
+    const centerX = canvas.width - 150;
+    const centerY = 370;
+    const radius = 80;
+    
+    // Draw score circle background
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = score >= 15 ? '#4CAF50' : score >= 10 ? '#FF9800' : '#F44336';
+    ctx.fill();
+    
+    // Score text in circle
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 36px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${score}/20`, centerX, centerY - 10);
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText(`${percentage}%`, centerX, centerY + 20);
+    
+    // Detailed scores
+    ctx.fillStyle = '#333';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`总分 Total Score: ${score}/20 (${percentage}%)`, 50, 360);
+    ctx.fillText(`等级 Grade: ${grade}`, 50, 390);
+    ctx.fillText(`技能水平 Skill Level: ${getSkillLevel(score)}`, 50, 420);
+    
+    if (unanswered > 0) {
+        ctx.fillStyle = '#F44336';
+        ctx.fillText(`未作答题目 Unanswered: ${unanswered} 题`, 50, 450);
+    }
+    
+    // Performance Analysis
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('表现分析 Performance Analysis', 50, 510);
+    
+    ctx.font = '18px Arial';
+    const feedback = getFeedback(score);
+    const words = feedback.split(' ');
+    let line = '';
+    let y = 540;
+    
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > 700 && n > 0) {
+            ctx.fillText(line, 50, y);
+            line = words[n] + ' ';
+            y += 25;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, 50, y);
+    
+    // Wrong Answers Section (if any)
+    if (wrongAnswers.length > 0) {
+        y += 50;
+        ctx.fillStyle = '#F44336';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`错题分析 Wrong Answers (${wrongAnswers.length} 题)`, 50, y);
+        
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Arial';
+        
+        wrongAnswers.slice(0, 5).forEach((error, index) => {
+            y += 30;
+            ctx.fillText(`${index + 1}. 第${error.number}题: ${error.selected} → ${error.correct}`, 50, y);
+        });
+        
+        if (wrongAnswers.length > 5) {
+            y += 25;
+            ctx.fillText(`... 还有 ${wrongAnswers.length - 5} 道错题`, 50, y);
+        }
+    }
+    
+    // Footer
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('继续加油，学好马来语谚语！Keep up the good work!', canvas.width/2, canvas.height - 30);
+    
+    // Display canvas and download options
+    const reportDiv = document.getElementById('reportCanvas');
+    reportDiv.innerHTML = `
+        <div class="canvas-container">
+            <h3>📋 成绩单已生成</h3>
+            <canvas id="generatedCanvas" width="800" height="1000" style="max-width: 100%; height: auto; border: 1px solid #ddd;"></canvas>
+            <div style="margin-top: 15px;">
+                <button class="download-btn" onclick="downloadReportImage()">💾 下载图片</button>
+                <button class="whatsapp-btn" onclick="shareReportImage()">📱 一键发送给老师</button>
+            </div>
+            <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                💡 提示：点击"一键发送给老师"在支持的设备上可直接分享图片到WhatsApp！
+            </p>
+        </div>
+    `;
+    
+    // Copy canvas content to displayed canvas
+    const displayCanvas = document.getElementById('generatedCanvas');
+    const displayCtx = displayCanvas.getContext('2d');
+    displayCtx.drawImage(canvas, 0, 0);
+    
+    // Store canvas globally for download
+    window.reportCanvas = canvas;
+    
+    // Scroll to canvas
+    reportDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadReportImage() {
+    if (window.reportCanvas) {
+        const link = document.createElement('a');
+        link.download = `BM_Peribahasa_成绩单_${new Date().toISOString().split('T')[0]}.png`;
+        link.href = window.reportCanvas.toDataURL();
+        link.click();
+    }
+}
+
+function shareReportImage() {
+    if (window.reportCanvas) {
+        // Check if the device supports native sharing
+        if (navigator.share) {
+            // Convert canvas to blob for native sharing
+            window.reportCanvas.toBlob(function(blob) {
+                const file = new File([blob], `BM_Peribahasa_成绩单_${new Date().toISOString().split('T')[0]}.png`, { type: 'image/png' });
+                
+                navigator.share({
+                    title: 'BM Peribahasa Quiz 成绩单',
+                    text: '老师您好！这是我的BM Peribahasa测验成绩单',
+                    files: [file]
+                }).then(() => {
+                    console.log('成功分享图片');
+                }).catch((error) => {
+                    console.log('分享失败，使用备用方案:', error);
+                    fallbackShare();
+                });
+            });
+        } else {
+            // Fallback for devices that don't support native sharing
+            fallbackShare();
+        }
+    } else {
+        alert('请先生成成绩单图片！');
+    }
+}
+
+function fallbackShare() {
+    // Download the image first
+    const link = document.createElement('a');
+    link.download = `BM_Peribahasa_成绩单_${new Date().toISOString().split('T')[0]}.png`;
+    link.href = window.reportCanvas.toDataURL();
+    link.click();
+    
+    // Open teacher's WhatsApp with a pre-filled message
+    const message = encodeURIComponent('老师您好！我刚完成了BM Peribahasa测验，现在发送成绩单图片给您查看 📋');
+    
+    // Small delay to ensure download completes
+    setTimeout(() => {
+        window.open(`https://wa.me/60127317286?text=${message}`, '_blank');
+        
+        // Show simplified instructions
+        setTimeout(() => {
+            alert('📱 WhatsApp已打开！\n\n简单3步完成发送：\n1️⃣ 点击 📎 附件图标\n2️⃣ 选择 "相册" 或 "文档"\n3️⃣ 选择刚下载的成绩单图片即可发送！');
+        }, 800);
+    }, 500);
+}
+
+// New function for one-click sharing from history
+function quickShareHistoryImage(attemptIndex) {
+    const attempts = JSON.parse(localStorage.getItem('peribahasaQuizAttempts') || '[]');
+    const attempt = attempts[attemptIndex];
+    
+    if (!attempt) {
+        alert("找不到该测验记录！");
+        return;
+    }
+    
+    // Generate image and immediately try to share
+    generateHistoryReportImageAndShare(attempt);
+}
+
+function generateHistoryReportImageAndShare(attempt) {
+    const unanswered = attempt.results.filter(r => r.selected === "未作答").length;
+    const wrongAnswers = attempt.results.filter(r => !r.isCorrect).map((r, index) => ({
+        number: attempt.results.indexOf(r) + 1,
+        question: r.question.substring(0, 50) + "...",
+        selected: r.selected,
+        correct: r.correct
+    }));
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 1000;
+    
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f8f9fa');
+    gradient.addColorStop(1, '#e9ecef');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Header background
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillRect(0, 0, canvas.width, 120);
+    
+    // Title
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('BM Peribahasa Quiz', canvas.width/2, 50);
+    ctx.fillText('马来语谚语测验成绩单', canvas.width/2, 90);
+    
+    // Student Info Section
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('学生信息 Student Information', 50, 170);
+    
+    ctx.font = '20px Arial';
+    ctx.fillText(`姓名 Name: ${attempt.name}`, 50, 210);
+    ctx.fillText(`年级 Form: ${attempt.form}`, 50, 240);
+    ctx.fillText(`测验日期 Date: ${attempt.date}`, 50, 270);
+    
+    // Score Section
+    const percentage = Math.round((attempt.score / 20) * 100);
+    const grade = getGrade(attempt.score);
+    
+    ctx.fillStyle = '#2196F3';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('测验成绩 Test Results', 50, 320);
+    
+    // Score circle
+    const centerX = canvas.width - 150;
+    const centerY = 370;
+    const radius = 80;
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = attempt.score >= 15 ? '#4CAF50' : attempt.score >= 10 ? '#FF9800' : '#F44336';
+    ctx.fill();
+    
+    // Score text in circle
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 36px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${attempt.score}/20`, centerX, centerY - 10);
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText(`${percentage}%`, centerX, centerY + 20);
+    
+    // Detailed scores
+    ctx.fillStyle = '#333';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`总分 Total: ${attempt.score}/20 (${percentage}%)`, 50, 360);
+    ctx.fillText(`等级 Grade: ${grade}`, 50, 390);
+    ctx.fillText(`技能水平 Level: ${getSkillLevel(attempt.score)}`, 50, 420);
+    
+    if (unanswered > 0) {
+        ctx.fillStyle = '#F44336';
+        ctx.fillText(`未作答 Unanswered: ${unanswered} 题`, 50, 450);
+    }
+    
+    // Performance Analysis
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('表现分析 Performance Analysis', 50, 500);
+    
+    ctx.font = '18px Arial';
+    const feedback = getFeedback(attempt.score);
+    ctx.fillText(feedback.substring(0, 80), 50, 530);
+    if (feedback.length > 80) {
+        ctx.fillText(feedback.substring(80), 50, 555);
+    }
+    
+    // Wrong Answers Section
+    if (wrongAnswers.length > 0) {
+        ctx.fillStyle = '#F44336';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`错题分析 Wrong Answers (${wrongAnswers.length})`, 50, 600);
+        
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Arial';
+        wrongAnswers.slice(0, 4).forEach((error, index) => {
+            const y = 630 + (index * 25);
+            ctx.fillText(`${index + 1}. Q${error.number}: ${error.selected} → ${error.correct}`, 50, y);
+        });
+    }
+    
+    // Footer
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('继续加油，学好马来语谚语！', canvas.width/2, canvas.height - 30);
+    
+    // Try to share immediately
+    if (navigator.share) {
+        canvas.toBlob(function(blob) {
+            const file = new File([blob], `成绩单_${attempt.name}_${new Date().toISOString().split('T')[0]}.png`, { type: 'image/png' });
+            
+            navigator.share({
+                title: 'BM Peribahasa Quiz 成绩单',
+                text: `老师您好！这是${attempt.name}的BM Peribahasa测验成绩单`,
+                files: [file]
+            }).catch(() => {
+                fallbackShareHistory(canvas, attempt);
+            });
+        });
+    } else {
+        fallbackShareHistory(canvas, attempt);
+    }
+}
+
+function fallbackShareHistory(canvas, attempt) {
+    // Download image
+    const link = document.createElement('a');
+    link.download = `成绩单_${attempt.name}_${attempt.date.replace(/[/:]/g, '-')}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    
+    // Open WhatsApp
+    const message = encodeURIComponent(`老师您好！我是${attempt.name}，发送成绩单图片给您查看 📋`);
+    setTimeout(() => {
+        window.open(`https://wa.me/60127317286?text=${message}`, '_blank');
+        alert('📱 图片已下载！WhatsApp已打开，请附加图片发送给老师');
+    }, 500);
+}
+
+function getGrade(score) {
+    if (score >= 18) return "A+ 优秀";
+    if (score >= 16) return "A 良好";
+    if (score >= 14) return "B+ 不错";
+    if (score >= 12) return "B 及格";
+    if (score >= 10) return "C+ 需要努力";
+    if (score >= 8) return "C 需要加强";
+    return "D 需要重新学习";
+}
+
+function getSkillLevel(score) {
+    if (score >= 18) return "专家级 🌟";
+    if (score >= 15) return "熟练级 ⭐";
+    if (score >= 12) return "中级 📚";
+    if (score >= 8) return "初级 📖";
+    return "入门级 🔰";
+}
+
+function saveAttempt(name, form, score, results) {
+    const attempts = JSON.parse(localStorage.getItem('peribahasaQuizAttempts') || '[]');
+    const attempt = {
+        date: new Date().toLocaleString(),
+        name,
+        form,
+        score,
+        results
+    };
+    
+    attempts.unshift(attempt); // Add new attempt at beginning
+    localStorage.setItem('peribahasaQuizAttempts', JSON.stringify(attempts));
+}
+
+function loadHistory() {
+    const attempts = JSON.parse(localStorage.getItem('peribahasaQuizAttempts') || '[]');
+    const historyList = document.getElementById('historyList');
+    
+    if (attempts.length === 0) {
+        historyList.innerHTML = "<p>你还没有任何测验记录，快去做测验吧！</p>";
+        return;
+    }
+    
+    let html = "";
+    attempts.forEach((attempt, index) => {
+        html += `
+            <div class="question" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px;">
+                <h3>测验 #${index + 1} - ${attempt.date}</h3>
+                <p>姓名: ${attempt.name} | 年级: ${attempt.form}</p>
+                <p>得分: <strong>${attempt.score} / 20</strong></p>
+                <button onclick="viewAttemptDetails(${index})">查看详情</button>
+                <div style="margin-top: 10px;">
+                    <button class="whatsapp-btn" onclick="sendHistoryToWhatsApp(${index}, 'teacher')" style="font-size: 12px; padding: 8px 12px;">📱 发送文字成绩</button>
+                    <button class="download-btn" onclick="quickShareHistoryImage(${index})" style="font-size: 12px; padding: 8px 12px;">🖼️ 一键发送图片</button>
+                </div>
+                <div id="attemptDetails${index}" style="display: none; margin-top: 10px;">
+                    ${attempt.results.map((r, qIndex) => `
+                        <div style="margin-bottom: 15px; padding: 10px; background: ${r.isCorrect ? '#e6ffe6' : '#ffe6e6'}; border-radius: 5px;">
+                            <p><strong>第${qIndex + 1}题：${r.isCorrect ? '正确 ✅' : '错误 ❌'}</strong></p>
+                            <p>题目: ${r.question}</p>
+                            ${!r.isCorrect ? `<p>你的答案: ${r.selected}</p>` : ''}
+                            <p>正确答案: ${r.correct}</p>
+                            <p>解释: ${r.explain}</p>
+                            <p>鼓励: ${r.encourage}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    historyList.innerHTML = html;
+}
+
+function sendHistoryToWhatsApp(attemptIndex, recipient = 'teacher') {
+    const attempts = JSON.parse(localStorage.getItem('peribahasaQuizAttempts') || '[]');
+    const attempt = attempts[attemptIndex];
+    
+    if (!attempt) {
+        alert("找不到该测验记录！");
+        return;
+    }
+    
+    const percentage = Math.round((attempt.score / 20) * 100);
+    const grade = getGrade(attempt.score);
+    const unanswered = attempt.results.filter(r => r.selected === "未作答").length;
+    
+    let message = '';
+    let whatsappUrl = '';
+    
+    if (recipient === 'teacher') {
+        message += `尊敬的老师，您好！\n\n`;
+        message += `我是 ${attempt.name} (${attempt.form})，向您汇报BM Peribahasa测验成绩：\n\n`;
+        message += `📊 测验成绩: ${attempt.score}/20 分 (${percentage}%)\n`;
+        message += `⭐ 等级: ${grade}\n`;
+        message += `📅 测验时间: ${attempt.date}\n`;
+        if (unanswered > 0) {
+            message += `⚠️ 未完成题目: ${unanswered} 题\n`;
+        }
+        message += `\n🎯 掌握程度: ${getSkillLevel(attempt.score)}\n`;
+        
+        // Add wrong answers for teacher
+        const wrongAnswers = attempt.results.filter(r => !r.isCorrect);
+        if (wrongAnswers.length > 0) {
+            message += `\n❌ 需要加强的题目:\n`;
+            wrongAnswers.slice(0, 3).forEach((r, index) => {
+                const qNum = attempt.results.indexOf(r) + 1;
+                message += `${index + 1}. 第${qNum}题: 选择了"${r.selected}"，正确答案是"${r.correct}"\n`;
+            });
+            if (wrongAnswers.length > 3) {
+                message += `... 还有 ${wrongAnswers.length - 3} 道需要复习\n`;
+            }
+        }
+        
+        message += `\n我会针对错题进行复习，谢谢老师的指导！`;
+        
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Create WhatsApp URL with specific teacher phone number
+        whatsappUrl = `https://wa.me/60127317286?text=${encodedMessage}`;
+        
+    } else {
+        // General message (keeping the original format)
+        message += `📚 BM Peribahasa Quiz 成绩报告\n\n`;
+        message += `👤 姓名: ${attempt.name}\n`;
+        message += `🎓 年级: ${attempt.form}\n`;
+        message += `📅 测验日期: ${attempt.date}\n`;
+        message += `📊 得分: ${attempt.score}/20 (${percentage}%)\n`;
+        message += `⭐ 等级: ${grade}\n`;
+        
+        if (unanswered > 0) {
+            message += `⚠️ 未作答题目: ${unanswered} 题\n`;
+        }
+        
+        message += `\n📝 评语: ${getFeedback(attempt.score)}\n`;
+        message += `\n🎯 马来语谚语掌握程度: ${getSkillLevel(attempt.score)}\n`;
+        
+        // Add wrong answers details
+        const wrongAnswers = attempt.results.filter(r => !r.isCorrect);
+        if (wrongAnswers.length > 0) {
+            message += `\n❌ 错题分析:\n`;
+            wrongAnswers.slice(0, 3).forEach((r, index) => {
+                const qNum = attempt.results.indexOf(r) + 1;
+                message += `${index + 1}. 第${qNum}题: ${r.selected} → ${r.correct}\n`;
+            });
+            if (wrongAnswers.length > 3) {
+                message += `... 还有 ${wrongAnswers.length - 3} 道错题\n`;
+            }
+        }
+        
+        message += `\n💪 继续加油，学好马来语谚语！`;
+        
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Create general WhatsApp URL
+        whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    }
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+}
+
+function generateHistoryReportImage(attemptIndex) {
+    const attempts = JSON.parse(localStorage.getItem('peribahasaQuizAttempts') || '[]');
+    const attempt = attempts[attemptIndex];
+    
+    if (!attempt) {
+        alert("找不到该测验记录！");
+        return;
+    }
+    
+    const unanswered = attempt.results.filter(r => r.selected === "未作答").length;
+    const wrongAnswers = attempt.results.filter(r => !r.isCorrect).map((r, index) => ({
+        number: attempt.results.indexOf(r) + 1,
+        question: r.question.substring(0, 50) + "...",
+        selected: r.selected,
+        correct: r.correct
+    }));
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 1000;
+    
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#f8f9fa');
+    gradient.addColorStop(1, '#e9ecef');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Header background
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillRect(0, 0, canvas.width, 120);
+    
+    // Title
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('BM Peribahasa Quiz', canvas.width/2, 50);
+    ctx.fillText('马来语谚语测验成绩单', canvas.width/2, 90);
+    
+    // Student Info Section
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('学生信息 Student Information', 50, 170);
+    
+    ctx.font = '20px Arial';
+    ctx.fillText(`姓名 Name: ${attempt.name}`, 50, 210);
+    ctx.fillText(`年级 Form: ${attempt.form}`, 50, 240);
+    ctx.fillText(`测验日期 Date: ${attempt.date}`, 50, 270);
+    
+    // Score Section
+    const percentage = Math.round((attempt.score / 20) * 100);
+    const grade = getGrade(attempt.score);
+    
+    ctx.fillStyle = '#2196F3';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('测验成绩 Test Results', 50, 320);
+    
+    // Score circle
+    const centerX = canvas.width - 150;
+    const centerY = 370;
+    const radius = 80;
+    
+    // Draw score circle background
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = attempt.score >= 15 ? '#4CAF50' : attempt.score >= 10 ? '#FF9800' : '#F44336';
+    ctx.fill();
+    
+    // Score text in circle
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 36px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${attempt.score}/20`, centerX, centerY - 10);
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText(`${percentage}%`, centerX, centerY + 20);
+    
+    // Detailed scores
+    ctx.fillStyle = '#333';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`总分 Total Score: ${attempt.score}/20 (${percentage}%)`, 50, 360);
+    ctx.fillText(`等级 Grade: ${grade}`, 50, 390);
+    ctx.fillText(`技能水平 Skill Level: ${getSkillLevel(attempt.score)}`, 50, 420);
+    
+    if (unanswered > 0) {
+        ctx.fillStyle = '#F44336';
+        ctx.fillText(`未作答题目 Unanswered: ${unanswered} 题`, 50, 450);
+    }
+    
+    // Performance Analysis
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('表现分析 Performance Analysis', 50, 510);
+    
+    ctx.font = '18px Arial';
+    const feedback = getFeedback(attempt.score);
+    const words = feedback.split(' ');
+    let line = '';
+    let y = 540;
+    
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > 700 && n > 0) {
+            ctx.fillText(line, 50, y);
+            line = words[n] + ' ';
+            y += 25;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, 50, y);
+    
+    // Wrong Answers Section (if any)
+    if (wrongAnswers.length > 0) {
+        y += 50;
+        ctx.fillStyle = '#F44336';
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText(`错题分析 Wrong Answers (${wrongAnswers.length} 题)`, 50, y);
+        
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Arial';
+        
+        wrongAnswers.slice(0, 5).forEach((error, index) => {
+            y += 30;
+            ctx.fillText(`${index + 1}. 第${error.number}题: ${error.selected} → ${error.correct}`, 50, y);
+        });
+        
+        if (wrongAnswers.length > 5) {
+            y += 25;
+            ctx.fillText(`... 还有 ${wrongAnswers.length - 5} 道错题`, 50, y);
+        }
+    }
+    
+    // Footer
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('继续加油，学好马来语谚语！Keep up the good work!', canvas.width/2, canvas.height - 30);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `BM_Peribahasa_成绩单_${attempt.name}_${attempt.date.replace(/[/:]/g, '-')}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    
+    // Open teacher's WhatsApp with message
+    const message = encodeURIComponent(`老师您好！我是${attempt.name}，这是我${attempt.date}的BM Peribahasa测验成绩单，请查看 📋`);
+    
+    // Small delay to ensure download starts first
+    setTimeout(() => {
+        window.open(`https://wa.me/60127317286?text=${message}`, '_blank');
+    }, 500);
+    
+    // Also show success message with instructions
+    setTimeout(() => {
+        alert('📱 成绩单图片已下载！WhatsApp对话已打开\n\n请在对话中附加刚下载的图片发送给老师即可！');
+    }, 1000);
+}
+
+function viewAttemptDetails(index) {
+    const detailsDiv = document.getElementById(`attemptDetails${index}`);
+    if (detailsDiv.style.display === 'none') {
+        detailsDiv.style.display = 'block';
+    } else {
+        detailsDiv.style.display = 'none';
+    }
+}
+
+function saveProgress() {
+    const name = document.getElementById('name').value;
+    const form = document.getElementById('form').value;
+    
+    if (!name || !form) {
+        alert("请先填写个人信息！");
+        return;
+    }
+    
+    const progress = {
+        name,
+        form,
+        answers: []
+    };
+    
+    questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        progress.answers.push(selected ? selected.value : null);
+    });
+    
+    localStorage.setItem('peribahasaQuizProgress', JSON.stringify(progress));
+    alert("进度已保存！你可以稍后回来继续完成测验。");
+}
+
+function loadProgress() {
+    const progress = JSON.parse(localStorage.getItem('peribahasaQuizProgress'));
+    
+    if (!progress) {
+        alert("没有找到保存的进度！");
+        return;
+    }
+    
+    document.getElementById('name').value = progress.name;
+    document.getElementById('form').value = progress.form;
+    
+    progress.answers.forEach((answer, index) => {
+        if (answer) {
+            const radio = document.querySelector(`input[name="q${index}"][value="${answer}"]`);
+            if (radio) radio.checked = true;
+        }
+    });
+    
+    alert("进度已加载！你可以继续完成测验。");
+}
+
+window.onload = function() {
+    const qDiv = document.getElementById('questions');
+    questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.className = "question";
+        div.innerHTML = `<p><strong>第${index + 1}题.</strong> ${q.q}</p>` +
+                        q.options.map(opt => `
+                            <label><input type="radio" name="q${index}" value="${opt}"> ${opt}</label><br>
+                        `).join('');
+        qDiv.appendChild(div);
+    });
+    
+    // Check if there's saved progress
+    if (localStorage.getItem('peribahasaQuizProgress')) {
+        if (confirm("检测到有保存的进度，是否加载？")) {
+            loadProgress();
+        }
+    }
+}
+</script>
+
+</body>
+</html>
